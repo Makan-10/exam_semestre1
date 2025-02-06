@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(Exam_Makan());
+  runApp(MyApp());
 }
 
-class Exam_Makan extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Jeu de Morpion',
       debugShowCheckedModeBanner: false,
-      title: 'Dessin App Makan',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -30,11 +30,9 @@ class _loginState extends State<login> {
   TextEditingController password = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
     return Scaffold(
-      
-      backgroundColor: const Color.fromARGB(61, 3, 24, 17),
-
+      backgroundColor: Color.fromARGB(255, 186, 187, 184),
       body: Padding(
         padding: EdgeInsets.only(top: 25),
         child: Container(
@@ -49,19 +47,17 @@ class _loginState extends State<login> {
                     width: 300,
                     height: 300,
                     child: Image.asset("assets/login.jpg"),
-                    
                   ),
-                ), 
+                ),
                 Padding(
-                  
                   padding: EdgeInsets.all(8),
                   child: TextFormField(
                     controller: email,
                     decoration: InputDecoration(
-                      hintText: "Entrez votre email",
+                      hintText: "Login",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20)),
-                      prefixIcon: Icon(Icons.mail),
+                      prefixIcon: Icon(Icons.person),
                     ),
                   ),
                 ),
@@ -71,10 +67,9 @@ class _loginState extends State<login> {
                       obscureText: visibilite,
                       controller: password,
                       decoration: InputDecoration(
-                          hintText: "Entrez votre mot de passe",
+                          hintText: "Mot de passe",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20)),
-                              
                           prefixIcon: Icon(Icons.lock),
                           suffixIcon: InkWell(
                             child: visibilite
@@ -91,27 +86,22 @@ class _loginState extends State<login> {
                     if (email.text.isEmpty || password.text.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text(
-                              "veuillez entrez l'email ou le mot de passe")));
+                              "veuillez entrez le login ou le mot de passe")));
                     }
                     if (email.text == "makan@.com" &&
                         password.text == "123") {
                       Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context) {
-                        return Home();
+                        return TicTacToe();
                       }));
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text("l'email ou mot de passe incorrect")));
+                          content: Text("login ou mot de passe incorrect")));
                     }
                     print('connection');
                   },
-                  
                   child: Text('connection'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(61, 3, 24, 17),
-
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                )),
+                ),
               ],
             ),
           ),
@@ -120,191 +110,164 @@ class _loginState extends State<login> {
     );
   }
 }
-class Home extends StatefulWidget {
+
+
+class TicTacToe extends StatefulWidget {
   @override
-  _HomeState createState() => _HomeState();
+  _TicTacToeState createState() => _TicTacToeState();
 }
 
-class _HomeState extends State<Home> {
-  List<Offset?> points = [];
-  Color selectedColor = Colors.black;
-  double strokeWidth = 4.0;
+class _TicTacToeState extends State<TicTacToe> {
+  List<List<String>> _board = [
+    ['', '', ''],
+    ['', '', ''],
+    ['', '', '']
+  ];
+
+  String _currentPlayer = 'X'; // Le joueur courant
+  String _winner = ''; // Le gagnant, si il y en a un
+  bool _gameOver = false; // Si le jeu est terminé ou non
+
+  // Fonction pour gérer les mouvements
+  void _makeMove(int row, int col) {
+    if (_board[row][col] == '' && !_gameOver) {
+      setState(() {
+        _board[row][col] = _currentPlayer;
+        _checkWinner();
+        _currentPlayer = _currentPlayer == 'X' ? 'O' : 'X';
+      });
+    }
+  }
+
+  // Fonction pour vérifier si un joueur a gagné
+  void _checkWinner() {
+    // Vérifier les lignes et les colonnes
+    for (int i = 0; i < 3; i++) {
+      if (_board[i][0] == _board[i][1] && _board[i][1] == _board[i][2] && _board[i][0] != '') {
+        _winner = _board[i][0];
+        _gameOver = true;
+        return;
+      }
+      if (_board[0][i] == _board[1][i] && _board[1][i] == _board[2][i] && _board[0][i] != '') {
+        _winner = _board[0][i];
+        _gameOver = true;
+        return;
+      }
+    }
+    // Vérifier les diagonales
+    if (_board[0][0] == _board[1][1] && _board[1][1] == _board[2][2] && _board[0][0] != '') {
+      _winner = _board[0][0];
+      _gameOver = true;
+      return;
+    }
+    if (_board[0][2] == _board[1][1] && _board[1][1] == _board[2][0] && _board[0][2] != '') {
+      _winner = _board[0][2];
+      _gameOver = true;
+      return;
+    }
+    // Vérifier si la grille est pleine sans gagnant
+    bool isFull = true;
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        if (_board[i][j] == '') {
+          isFull = false;
+        }
+      }
+    }
+    if (isFull) {
+      _gameOver = true;
+    }
+  }
+
+  // Fonction pour réinitialiser le jeu
+  void _resetGame() {
+    setState(() {
+      _board = [
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', '']
+      ];
+      _currentPlayer = 'X';
+      _winner = '';
+      _gameOver = false;
+    });
+  }
+
+  // Widget pour afficher la grille de jeu
+  Widget _buildBoard() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(3, (row) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(3, (col) {
+            return GestureDetector(
+              onTap: () => _makeMove(row, col),
+              child: Container(
+                width: 100,
+                height: 100,
+                margin: EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black, width: 2),
+                  color: Colors.red,
+                ),
+                child: Center(
+                  child: Text(
+                    _board[row][col],
+                    style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+      }),
+    );
+  }
+
+  // Widget pour afficher le message de fin de jeu
+  Widget _buildGameOverMessage() {
+    String message = '';
+    if (_winner != '') {
+      message = 'Le joueur $_winner a gagné !';
+    } else {
+      message = 'Match nul !';
+    }
+
+    return Column(
+      children: [
+        Text(
+          message,
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: _resetGame,
+          child: Text('Rejouer'),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(
-      child: Column(
-        children: [
-          Container(
-            width: 150,
-            height: 150,
-            decoration: BoxDecoration(
-              image: DecorationImage(image:AssetImage("assets/login.jpg"))
-            ),
-          ),
-          Center(
-            child: Text("user@gmail.com"),),
-            ListTile(title: Text("Home"),
-            leading: Icon(Icons.home),)
-        ]
-       
-      ),
-      ),
       appBar: AppBar(
-        title: Text('Dessin App Makan',),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.clear),
-            onPressed: () {
-              setState(() {
-                points.clear();
-              });
-            },
-          ),
-        ],
+        title: Text('Jeu de Morpion Makan'),
       ),
-      body: GestureDetector(
-        onPanUpdate: (details) {
-          setState(() {
-            points.add(details.localPosition);
-          });
-        },
-        onPanEnd: (details) {
-          setState(() {
-            points.add(null); // Add a null to indicate the end of a stroke
-          });
-        },
-        child: CustomPaint(
-          painter: Dessin(points: points, color: selectedColor, strokeWidth: strokeWidth),
-          size: Size.infinite,
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                icon: Icon(Icons.color_lens, color: selectedColor),
-                onPressed: () async {
-                  Color? pickedColor = await showDialog(
-                    context: context,
-                    builder: (context) => Boite_Selection(selectedColor: selectedColor),
-                  );
-                  if (pickedColor != null) {
-                    setState(() {
-                      selectedColor = pickedColor;
-                    });
-                  }
-                },
-              ),
-              Slider(
-                value: strokeWidth,
-                min: 1.0,
-                max: 10.0,
-                onChanged: (value) {
-                  setState(() {
-                    strokeWidth = value;
-                  });
-                },
-              ),
-              Text('Bordure: ${strokeWidth.toInt()}'),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class Dessin extends CustomPainter {
-  final List<Offset?> points;
-  final Color color;
-  final double strokeWidth;
-
-  Dessin({required this.points, required this.color, required this.strokeWidth});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()
-      ..color = color
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = strokeWidth;
-
-    for (int i = 0; i < points.length - 1; i++) {
-      if (points[i] != null && points[i + 1] != null) {
-        canvas.drawLine(points[i]!, points[i + 1]!, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(Dessin oldDelegate) => true;
-}
-
-class Boite_Selection extends StatelessWidget {
-  final Color selectedColor;
-
-  Boite_Selection({required this.selectedColor});
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Sélectionner votre couleur'),
-      content: SingleChildScrollView(
-        child: Boite_Couleur(
-          pickerColor: selectedColor,
-          onColorChanged: (color) {
-            Navigator.of(context).pop(color);
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class Boite_Couleur extends StatelessWidget {
-  final Color pickerColor;
-  final ValueChanged<Color> onColorChanged;
-
-  Boite_Couleur({required this.pickerColor, required this.onColorChanged});
-
-  final List<Color> colors = [
-    Colors.black,
-    Colors.red,
-    Colors.green,
-    Colors.blue,
-    Colors.yellow,
-    Colors.purple,
-    Colors.orange,
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 10.0,
-      runSpacing: 10.0,
-      children: colors.map((color) {
-        return GestureDetector(
-          onTap: () {
-            onColorChanged(color);
-          },
-          child: Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: pickerColor == color ? Colors.grey : Colors.transparent,
-                width: 2.0,
-              ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildBoard(),
+            SizedBox(height: 20),
+            _gameOver ? _buildGameOverMessage() : Text(
+              'C\'est au tour de $_currentPlayer',
+              style: TextStyle(fontSize: 20),
             ),
-          ),
-        );
-      }).toList(),
+          ],
+        ),
+      ),
     );
   }
 }
