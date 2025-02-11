@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(TicTacToeApp());
 }
 
-class MyApp extends StatelessWidget {
+class TicTacToeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Jeu de Morpion',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: login(),
     );
   }
 }
+
 class login extends StatefulWidget {
   const login({super.key});
 
@@ -30,9 +31,9 @@ class _loginState extends State<login> {
   TextEditingController password = TextEditingController();
 
   @override
-  Widget build(BuildContext context) { 
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 186, 187, 184),
+      backgroundColor: Colors.blue[50],
       body: Padding(
         padding: EdgeInsets.only(top: 25),
         child: Container(
@@ -44,8 +45,6 @@ class _loginState extends State<login> {
                 Padding(
                   padding: EdgeInsets.all(8),
                   child: Container(
-                    width: 300,
-                    height: 300,
                     child: Image.asset("assets/login.jpg"),
                   ),
                 ),
@@ -56,30 +55,37 @@ class _loginState extends State<login> {
                     decoration: InputDecoration(
                       hintText: "Login",
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20)),
+                          borderRadius: BorderRadius.circular(15)),
                       prefixIcon: Icon(Icons.person),
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                   ),
                 ),
                 Padding(
                   padding: EdgeInsets.all(8),
                   child: TextFormField(
-                      obscureText: visibilite,
-                      controller: password,
-                      decoration: InputDecoration(
-                          hintText: "Mot de passe",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          prefixIcon: Icon(Icons.lock),
-                          suffixIcon: InkWell(
-                            child: visibilite
-                                ? Icon(Icons.visibility_off)
-                                : Icon(Icons.visibility),
-                            onTap: () {
-                              visibilite = !visibilite;
-                              setState(() {});
-                            },
-                          ))),
+                    obscureText: visibilite,
+                    controller: password,
+                    decoration: InputDecoration(
+                      hintText: "Mot de passe",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      prefixIcon: Icon(Icons.lock),
+                      filled: true,
+                      fillColor: Colors.white,
+                      suffixIcon: InkWell(
+                        child: visibilite
+                            ? Icon(Icons.visibility_off)
+                            : Icon(Icons.visibility),
+                        onTap: () {
+                          setState(() {
+                            visibilite = !visibilite;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
                 ),
                 OutlinedButton(
                   onPressed: () {
@@ -100,7 +106,18 @@ class _loginState extends State<login> {
                     }
                     print('connection');
                   },
-                  child: Text('connection'),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.blue),
+                    backgroundColor: Colors.blue[400],
+                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'Connexion',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
                 ),
               ],
             ),
@@ -111,141 +128,126 @@ class _loginState extends State<login> {
   }
 }
 
-
 class TicTacToe extends StatefulWidget {
   @override
   _TicTacToeState createState() => _TicTacToeState();
 }
 
 class _TicTacToeState extends State<TicTacToe> {
-  List<List<String>> _board = [
-    ['', '', ''],
-    ['', '', ''],
-    ['', '', '']
-  ];
+  List<String> board = List.filled(9, "");
+  bool isXTurn = true;
+  int xPions = 0;  // Nombre de pions placés pour X
+  int oPions = 0;  // Nombre de pions placés pour O
+  int scoreX = 0;  // Score de X
+  int scoreO = 0;  // Score de O
+  int? selectedTile;  // Pour gérer la sélection d'un pion à déplacer
+  bool canMove = false; // Pour savoir si un pion peut être déplacé
+  bool gameOver = false; // Pour savoir si le jeu est terminé
 
-  String _currentPlayer = 'X'; // Le joueur courant
-  String _winner = ''; // Le gagnant, si il y en a un
-  bool _gameOver = false; // Si le jeu est terminé ou non
-
-  // Fonction pour gérer les mouvements
-  void _makeMove(int row, int col) {
-    if (_board[row][col] == '' && !_gameOver) {
-      setState(() {
-        _board[row][col] = _currentPlayer;
-        _checkWinner();
-        _currentPlayer = _currentPlayer == 'X' ? 'O' : 'X';
-      });
-    }
-  }
-
-  // Fonction pour vérifier si un joueur a gagné
-  void _checkWinner() {
-    // Vérifier les lignes et les colonnes
-    for (int i = 0; i < 3; i++) {
-      if (_board[i][0] == _board[i][1] && _board[i][1] == _board[i][2] && _board[i][0] != '') {
-        _winner = _board[i][0];
-        _gameOver = true;
-        return;
-      }
-      if (_board[0][i] == _board[1][i] && _board[1][i] == _board[2][i] && _board[0][i] != '') {
-        _winner = _board[0][i];
-        _gameOver = true;
-        return;
-      }
-    }
-    // Vérifier les diagonales
-    if (_board[0][0] == _board[1][1] && _board[1][1] == _board[2][2] && _board[0][0] != '') {
-      _winner = _board[0][0];
-      _gameOver = true;
-      return;
-    }
-    if (_board[0][2] == _board[1][1] && _board[1][1] == _board[2][0] && _board[0][2] != '') {
-      _winner = _board[0][2];
-      _gameOver = true;
-      return;
-    }
-    // Vérifier si la grille est pleine sans gagnant
-    bool isFull = true;
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        if (_board[i][j] == '') {
-          isFull = false;
-        }
-      }
-    }
-    if (isFull) {
-      _gameOver = true;
-    }
-  }
-
-  // Fonction pour réinitialiser le jeu
-  void _resetGame() {
+  void _resetBoard() {
     setState(() {
-      _board = [
-        ['', '', ''],
-        ['', '', ''],
-        ['', '', '']
-      ];
-      _currentPlayer = 'X';
-      _winner = '';
-      _gameOver = false;
+      board = List.filled(9, "");
+      selectedTile = null;
+      xPions = 0;
+      oPions = 0;
+      canMove = false;
+      gameOver = false;
     });
   }
 
-  // Widget pour afficher la grille de jeu
-  Widget _buildBoard() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(3, (row) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(3, (col) {
-            return GestureDetector(
-              onTap: () => _makeMove(row, col),
-              child: Container(
-                width: 100,
-                height: 100,
-                margin: EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black, width: 2),
-                  color: Colors.red,
-                ),
-                child: Center(
-                  child: Text(
-                    _board[row][col],
-                    style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            );
-          }),
-        );
-      }),
+  void _onTileTap(int index) {
+    if (gameOver) return;
+
+    // Si un pion est sélectionné et la case est vide, on déplace le pion
+    if (selectedTile != null && board[index] == "" && canMove) {
+      setState(() {
+        board[index] = board[selectedTile!];
+        board[selectedTile!] = "";
+        selectedTile = null;
+        isXTurn = !isXTurn;  // Change de joueur après le déplacement
+        if (_checkWinner() != null) {
+          gameOver = true;
+        }
+      });
+    } 
+    // Si aucun pion n'est sélectionné, et la case est vide, le joueur place un pion
+    else if (selectedTile == null && board[index] == "" && (isXTurn && xPions < 3 || !isXTurn && oPions < 3)) {
+      setState(() {
+        board[index] = isXTurn ? "X" : "O";
+        if (isXTurn) {
+          xPions++;
+        } else {
+          oPions++;
+        }
+        isXTurn = !isXTurn;
+        if (xPions == 3 && oPions == 3) {
+          canMove = true; // Permet de commencer à déplacer les pions après les 3 pions de chaque joueur
+        }
+      });
+    }
+    // Si une case est tapée, sélectionner le pion à déplacer
+    else if (board[index] != "" && selectedTile == null && canMove) {
+      setState(() {
+        selectedTile = index;  // Sélectionne le pion à déplacer
+      });
+    }
+
+    // Vérifier si un joueur a gagné après chaque mouvement
+    String? winner = _checkWinner();
+    if (winner != null) {
+      if (winner == "X") {
+        setState(() {
+          scoreX++;  // Incrémenter le score de X
+        });
+      }
+      if (winner == "O") {
+        setState(() {
+          scoreO++;  // Incrémenter le score de O
+        });
+      }
+      _showWinnerDialog(winner);
+    }
+  }
+
+  String? _checkWinner() {
+    List<List<int>> winPatterns = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+    for (var pattern in winPatterns) {
+      if (board[pattern[0]] != "" &&
+          board[pattern[0]] == board[pattern[1]] &&
+          board[pattern[1]] == board[pattern[2]]) {
+        return board[pattern[0]];
+      }
+    }
+    if (!board.contains("")) return "Égalité";
+    return null;
+  }
+
+  void _showWinnerDialog(String winner) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(winner == "Égalité" ? "Match nul!" : "Le gagnant est $winner!"),
+        actions: [
+          TextButton(
+            child: Text("Rejouer", style: TextStyle(color: Colors.blue)),
+            onPressed: () {
+              _resetBoard();
+              Navigator.pop(context);
+            },
+          )
+        ],
+      ),
     );
   }
 
-  // Widget pour afficher le message de fin de jeu
-  Widget _buildGameOverMessage() {
-    String message = '';
-    if (_winner != '') {
-      message = 'Le joueur $_winner a gagné !';
-    } else {
-      message = 'Match nul !';
-    }
-
-    return Column(
-      children: [
-        Text(
-          message,
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: _resetGame,
-          child: Text('Rejouer'),
-        ),
-      ],
+  void _logout() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => login()),
     );
   }
 
@@ -253,17 +255,63 @@ class _TicTacToeState extends State<TicTacToe> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Jeu de Morpion Makan'),
+        title: Text("Jeu de Morpion", style: TextStyle(fontSize: 22)),
+        backgroundColor: Colors.blue,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            onPressed: _logout,
+          ),
+        ],
       ),
-      body: Center(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue[100]!, Colors.blue[200]!],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildBoard(),
+            // Affichage du score de chaque joueur
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "Score - X: $scoreX | O: $scoreO",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
             SizedBox(height: 20),
-            _gameOver ? _buildGameOverMessage() : Text(
-              'C\'est au tour de $_currentPlayer',
-              style: TextStyle(fontSize: 20),
+            GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 1,
+              ),
+              shrinkWrap: true,
+              itemCount: 9,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => _onTileTap(index),
+                  child: Container(
+                    margin: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      color: selectedTile == index ? Colors.blue[300] : Colors.white,
+                      boxShadow: [
+                        BoxShadow(color: Colors.black26, blurRadius: 8, spreadRadius: 2)
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        board[index],
+                        style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.blue),
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
